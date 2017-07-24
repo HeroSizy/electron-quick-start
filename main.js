@@ -3,27 +3,34 @@ const electron = require('electron')
 const app = electron.app
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
-
-const path = require('path')
-const url = require('url')
+const webContents = electron.webContents
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
-function createWindow () {
+function createWindow() {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 600})
+  mainWindow = new BrowserWindow({
+    width: 1920,
+    height: 1080,
+    alwaysOnTop: false,
+    fullscreen: false,
+    autoHideMenuBar: true,
+    
+    webPreferences: {
+      allowDisplayingInsecureContent: true,
+      webSecurity: false
+    }
+  })
 
+  mainWindow.maximize();
   // and load the index.html of the app.
-  mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'index.html'),
-    protocol: 'file:',
-    slashes: true
-  }))
-
+  mainWindow.loadURL(`https://localhost:9001/`);
+  mainWindow.webContents.openDevTools();
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
+
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
@@ -33,6 +40,14 @@ function createWindow () {
     mainWindow = null
   })
 }
+
+
+
+app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+  event.preventDefault()
+  callback(true)
+  //mainWindow.loadURL(`http://google.com`);
+})
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -54,6 +69,7 @@ app.on('activate', function () {
   if (mainWindow === null) {
     createWindow()
   }
+
 })
 
 // In this file you can include the rest of your app's specific main process
